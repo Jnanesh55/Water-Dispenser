@@ -21,12 +21,12 @@ public class PaymentController {
     private Esp32CommunicationService communicationService;
 
     @PostMapping("/verify")
-    public PaymentResponse verifyPayment(@Value("${razorpay.key_secret}") String secret, @RequestBody PaymentRequest request){
-        PaymentResponse response = PaymentService.verifyAndProcessPayment(secret,request);
+    public PaymentResponse verifyPayment(@Value("${razorpay.key_secret}") String secret, @RequestBody PaymentRequest request) {
+        PaymentResponse response = paymentService.verifyAndProcessPayment(secret, request);
 
-        if(response.isSuccess()){
-            //send siganl to esp
-            communicationService.sendActivationSignal("/topic/motor","activate");
+        if(response.isSuccess()) {
+            //send signal to esp
+            communicationService.sendActivationSignal("/topic/motor", "ACTIVATE");
         }
         return response;
     }
@@ -36,4 +36,5 @@ public class PaymentController {
 
         return paymentService.getFixedQRPaymentDetails();
     }
+
 }

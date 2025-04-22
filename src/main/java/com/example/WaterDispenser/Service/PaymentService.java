@@ -18,18 +18,16 @@ import java.time.LocalDateTime;
 public class PaymentService {
 
     @Value("${payment.amount}")
-    private static int amount;
+    private int amount;
 
     @Value("${payment.currency}")
-    private static String currency;
+    private String currency;
 
     @Value("${payment.description}")
     private String description;
 
     private final RazorpayClient razorpayClient;
-    private static TransactionRepository transactionRepository;
-    private static  String secretKey; // Store the secret key explicitly
-
+    private TransactionRepository transactionRepository;  // Removed static
 
     @Autowired
     public PaymentService(@Value("${razorpay.key_id}") String keyId,
@@ -37,12 +35,12 @@ public class PaymentService {
                           TransactionRepository transactionRepository)
             throws RazorpayException {
         this.razorpayClient = new RazorpayClient(keyId, secret);
-        this.transactionRepository = transactionRepository;
+        this.transactionRepository = transactionRepository;  // Use instance variable
     }
 
-    public static PaymentResponse verifyAndProcessPayment(@Value("${razorpay.key_secret}") String secret,PaymentRequest request) {
+    public PaymentResponse verifyAndProcessPayment(String secret, PaymentRequest request) {
         try {
-            boolean isValid = verifyPaymentSignature(secret,request);
+            boolean isValid = verifyPaymentSignature(secret, request);  // Call instance method
 
             if (isValid) {
                 // Create a new transaction and set its attributes
@@ -53,7 +51,6 @@ public class PaymentService {
                 transaction.setCurrency(currency);
                 transaction.setStatus("success");
                 transaction.setCreatedAt(LocalDateTime.now());
-                //transaction.setMachineId(request.getMachineId());
                 transaction.setMotorActivated(false);
 
                 // Save the transaction in the database
@@ -69,10 +66,8 @@ public class PaymentService {
         return new PaymentResponse(false, "Payment verification failed", null);
     }
 
-
-    private static boolean verifyPaymentSignature(
-            @Value("${razorpay.key_secret}") String secret,
-            PaymentRequest request) {
+    // Changed to instance method
+    private boolean verifyPaymentSignature(String secret, PaymentRequest request) {
         JSONObject options = new JSONObject();
         options.put("razorpay_order_id", request.getOrderId());
         options.put("razorpay_payment_id", request.getPaymentId());
